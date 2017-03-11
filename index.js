@@ -22,6 +22,6 @@ app.get('/webhook/', function(req,res) {
 })
 
 app.listen(app.get('port'), function () {
-    consoloe.log("Running: port")
+    console.log("Running: port")
 }
 )
