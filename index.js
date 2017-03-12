@@ -37,16 +37,14 @@ app.post('/webhook/', function(req,res) {
 
 const token = "EAADAcQndBogBAIzs4Wnkn4D1duPED7ZAyBh5htLaKUnxb4Rj5D8OZCf7brvDzEQra27bzgELvnWZBCSuqSSHxtgGB22UTf19OimRrtehv5WowZAPVHJ2SA8jR2kPlkgTEQCXzuSVl0ZCuUoH0LaxBwvgoflFgpA8BnNZCyZBwkgKAZDZD"
 function sendText(sender, text) {
-    // let messageData = {
-    //     attachment: {
-    //         type: "image",
-    //         payload: {
-    //             url: "https://auspost.com.au/mypost-business/assets/mypost-business-app/images/mypost-business-logo.svg",
-    //             is_reusable: true
-    //         }
-    //     }
-    // }
-    let messageData = { text: text};
+    let messageData = {attachment: {
+            type: "image",
+            payload: {
+                url: "https://auspost.com.au/mypost-business/assets/mypost-business-app/images/mypost-business-logo.svg"
+            }
+        }
+    }
+    // let messageData = { text: text};
     request({
         url: "https://graph.facebook.com/v2.6/me/messages",
         qs: {access_token: token} ,
