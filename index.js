@@ -41,7 +41,7 @@ function sendText(sender, text) {
         attachment: {
             type: "image",
             payload: {
-                url: "https://petersapparel.parseapp.com/img/shirt.png",
+                url: "https://auspost.com.au/mypost-business/assets/mypost-business-app/images/mypost-business-logo.svg",
                 is_reusable: true
             }
         }
