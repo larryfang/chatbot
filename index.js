@@ -37,7 +37,16 @@ app.post('/webhook/', function(req,res) {
 
 const token = "EAADAcQndBogBAIzs4Wnkn4D1duPED7ZAyBh5htLaKUnxb4Rj5D8OZCf7brvDzEQra27bzgELvnWZBCSuqSSHxtgGB22UTf19OimRrtehv5WowZAPVHJ2SA8jR2kPlkgTEQCXzuSVl0ZCuUoH0LaxBwvgoflFgpA8BnNZCyZBwkgKAZDZD"
 function sendText(sender, text) {
-    let messageData = { text: text};
+    let messageData = {
+        attachment: {
+            type: "image",
+            payload: {
+                url: "https://petersapparel.parseapp.com/img/shirt.png",
+                is_reusable: true
+            }
+        }
+    }
+    // let messageData = { text: text};
     request({
         url: "https://graph.facebook.com/v2.6/me/messages",
         qs: {access_token: token} ,
