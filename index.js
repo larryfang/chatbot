@@ -32,6 +32,10 @@ app.post('/webhook/', function(req,res) {
             sendText(sender, text)
         } else if (event.message && event.message.attachments[0].type === 'image' ) {
             sendImage(sender, event.message.attachments[0].payload.url)
+        }    else if (event.postback && event.postback.payload) {
+            if (event.postback.payload.indexOf('departures') > -1) {
+                sendText(sender, event.postback.payload);
+            }
         }
     }
     res.sendStatus(200)
