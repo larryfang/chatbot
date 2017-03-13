@@ -15,6 +15,7 @@ app.get('/', function (req, res) {
 })
 
 app.get('/webhook/', function(req,res) {
+    
     if (req.query['hub.verify_token'] === 'blondibytes' ) {
         res.send(req.query['hub.challenge'])
     }
@@ -28,14 +29,36 @@ app.post('/webhook/', function(req,res) {
         let sender = event.sender.id;
         if(event.message && event.message.text) {
             let text = event.message.text
-            sendText(sender, "Text echo:" + text.substring(0,100))
+            sendText(sender, text)
+        } else if (event.message && event.message.attachments[0].type === 'image' ) {
+            sendImage(sender, event.message.attachments[0].payload.url)
         }
     }
     res.sendStatus(200)
 
 })
 
-const token = "EAADAcQndBogBAIzs4Wnkn4D1duPED7ZAyBh5htLaKUnxb4Rj5D8OZCf7brvDzEQra27bzgELvnWZBCSuqSSHxtgGB22UTf19OimRrtehv5WowZAPVHJ2SA8jR2kPlkgTEQCXzuSVl0ZCuUoH0LaxBwvgoflFgpA8BnNZCyZBwkgKAZDZD"
+function sendImage(sender, imageUrl) {
+    let messageData = {attachment: {
+            type: "image",
+            payload: {
+                url: imageUrl
+            }
+        }
+    }
+
+    request({
+        url: "https://graph.facebook.com/v2.6/me/messages",
+        qs: {access_token: token} ,
+        method: "POST",
+        json: {
+            recipient: {id: sender},
+            message: messageData
+        }
+    })
+}
+
+const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
 function sendText(sender, text) {
     // let messageData = {attachment: {
     //         type: "image",
@@ -44,29 +67,45 @@ function sendText(sender, text) {
     //         }
     //     }
     // }
-    let messageData = {
-        attachment: {
-            type: 'template',
-            payload: {
-                template_type: 'generic',
-                elements: [
-                    {
-                        title: '24th Street',
-                        'subtitle': '43 mins, 9 cars. 58 mins, 9 cars. 73 mins, 9 cars.'
-                    },
-                    {
-                        title: 'Daly City',
-                        'subtitle': '43 mins, 9 cars. 58 mins, 9 cars. 73 mins, 9 cars. 1 min, 9 cars. 4 mins, 9 cars.'
-                    },
-                    {
-                        title: 'Millbrae',
-                        'subtitle': '8 mins, 4 cars. 23 mins, 4 cars. 38 mins, 4 cars. 13 mins, 5 cars.'
-                    }
-                ]
+    let messageData = { text: text};
+
+    if (text.indexOf('template') > -1) {
+        messageData = {
+            attachment: {
+                type: 'template',
+                payload: {
+                    template_type: 'generic',
+                    elements: [
+                        {
+                            title: '24th Street',
+                            'subtitle': '43 mins, 9 cars. 58 mins, 9 cars. 73 mins, 9 cars.' ,
+                            'buttons': [{
+                                'type': 'web_url',
+                                'url': 'http://www.google.com/?q=' + text ,
+                                'title': 'Station Information'
+                            }, {
+                                'type': 'postback',
+                                'title': 'Departures',
+                                'payload': 'departures ' + text,
+                            }, {
+                                'type': 'web_url',
+                                'url': 'http://auspost.com.au/',
+                                'title': 'Directions'
+                            }]
+                        },
+                        {
+                            title: 'Daly City',
+                            'subtitle': '43 mins, 9 cars. 58 mins, 9 cars. 73 mins, 9 cars. 1 min, 9 cars. 4 mins, 9 cars.'
+                        },
+                        {
+                            title: 'Millbrae',
+                            'subtitle': '8 mins, 4 cars. 23 mins, 4 cars. 38 mins, 4 cars. 13 mins, 5 cars.'
+                        }
+                    ]
+                }
             }
-        }
-    };
-    // let messageData = { text: text};
+        };
+    }
     request({
         url: "https://graph.facebook.com/v2.6/me/messages",
         qs: {access_token: token} ,
