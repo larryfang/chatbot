@@ -42,7 +42,7 @@ function sendImage(sender, imageUrl) {
     let messageData = {attachment: {
             type: "image",
             payload: {
-                url: imageUrl
+                url: "https://auspost.com.au/content/dam/auspost_corp/home/3-stooges/illu-mypost.svg"
             }
         }
     }
