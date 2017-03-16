@@ -62,6 +62,15 @@ function sendImage(sender, imageUrl) {
     })
 }
 
+// {
+//     "setting_type": "call_to_actions",
+//     "thread_state": "new_thread",
+//     "call_to_actions":[{
+//     "message":{
+//         "text":"Hello! This is a Messenger bot!"
+//     }
+// }]
+// }
 const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
 function sendText(sender, text) {
     // let messageData = {attachment: {
