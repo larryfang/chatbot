@@ -184,7 +184,7 @@ function getPackagingQuickReplies() {
             {
                 "content_type": "text",
                 "title": displayPackagingOptions()[1].label,
-                "payload": displayPackagingOptions()[0].id
+                "payload": displayPackagingOptions()[1].id
             }
         ]
     };
