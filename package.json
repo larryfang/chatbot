@@ -12,7 +12,8 @@
   "dependencies": {
     "axios": "^0.15.3",
     "body-parser": "^1.17.1",
-    "express": "^4.15.2"
+    "express": "^4.15.2",
+    "lodash.isnumber": "^3.0.3"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"
