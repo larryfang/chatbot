@@ -1,4 +1,4 @@
-const SIMPLESEND_API = 'https://digitalapi-ptest.npe.auspost.com.au/simplesend/v1';
+const SIMPLESEND_API = 'https://digitalapi-stest.npe.auspost.com.au/simplesend/v1';
 
 module.exports = {
     POSTCODE_API: 'https://digitalapi.auspost.com.au/postcode/search?limit=10&q=',
