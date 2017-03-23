@@ -10,9 +10,9 @@
   "author": "larry fang",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.15.3",
     "body-parser": "^1.17.1",
-    "express": "^4.15.2",
-    "request": "^2.81.0"
+    "express": "^4.15.2"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"

@@ -1,14 +1,13 @@
-'use strict'
+'use strict';
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const request = require('request');
+const axios = require('axios');
 const api = require('./api');
 
 const app = express();
 app.set('port', (process.env.PORT || 5000));
 app.use(bodyParser.json());
-
 
 app.get('/', function (req, res) {
     res.send("Hi I'm a chatbot")
@@ -94,7 +93,7 @@ function sendText(sender, text) {
             }
         };
     }
-    request({
+    axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
         qs: {access_token: token} ,
         method: "POST",
@@ -124,7 +123,7 @@ function sendQuickReply(sender) {
                 }
             ]
         };
-    request({
+    axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
         qs: {access_token: token} ,
         method: "POST",
