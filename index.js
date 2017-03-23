@@ -94,7 +94,14 @@ app.post('/webhook/', function (req, res) {
                     // console.log(faqs);
                     let results = faqs.map((faq) => ({
                         title: faq.question,
-                        subtitle:  faq.answer
+                        subtitle:  faq.answer,
+                        "buttons":[
+                            {
+                                "type":"phone_number",
+                                "title":"Call Representative",
+                                "payload":"+61413868683"
+                            }
+                        ]
 
                     })) ;
 
