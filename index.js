@@ -7,68 +7,66 @@ const api = require('./api');
 
 const app = express();
 
-var state = { step: "welcome"};
+var state = {step: "welcome"};
 app.set('port', (process.env.PORT || 5000));
 app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
-    res.send("Hi I'm a chatbot")
+    res.send("Hi I'm a chatbot");
+});
 
-})
-
-app.get('/webhook/', function(req,res) {
-    
-    if (req.query['hub.verify_token'] === 'blondibytes' ) {
+app.get('/webhook/', function (req, res) {
+    if (req.query['hub.verify_token'] === 'blondibytes') {
         res.send(req.query['hub.challenge'])
-    }  else {
+    } else {
         res.send("Wrong token");
     }
-})
+});
 
-app.post('/webhook/', function(req,res) {
-    let messaging_events =  req.body.entry[0].messaging;
-    for (let i=0; i < messaging_events.length; i++) {
+app.post('/webhook/', function (req, res) {
+    let messaging_events = req.body.entry[0].messaging;
+    for (let i = 0; i < messaging_events.length; i++) {
         let event = messaging_events[i]
         let sender = event.sender.id;
 
         // if (state.step === 'start') {
         //     sendText(sender, 'Welcome to Auspost for small business')
         // }
-         console.log(sender);
+        console.log(sender);
 
         if (event.message && event.message.quick_reply) {
             if (event.message.quick_reply.payload === 'parcel') {
-                state.step ='sendparcel'
+                state.step = 'sendparcel'
                 sendText(sender, 'please provide the post code where you send your parcel from');
             } else if (event.message.quick_reply.payload === 'faq') {
-                state.step ='faq'
+                state.step = 'faq'
                 sendText(sender, "please ask me any questions in relation to mypost business");
 
             }
 
-        }  else if(event.message && event.message.text) {
+        } else if (event.message && event.message.text) {
             console.log(typeof  event.message.text);
             let text = event.message.text
             console.log(text);
-            if (text.indexOf('hi') > -1)   {
+            if (text.indexOf('hi') > -1) {
                 state.step = 'starting'
                 sendQuickReply(sender)
-            } else if (state.step === 'sendparcel' ) {
-                  if (parseInt(text)) {
-                      api.lookupPostcode(text).then(function (data) {
-                          console.log(data);
-                          state.step ='from post code'
-                          state.from = text;
-                          sendText(sender, "Please provide your postcode of the recipient of your parcel")
-                      })
-                  } else {
-                      sendText(sender, 'please provide the post code in the right format');
-                  }
-            }  else if (state.step === 'from post code') {
+            } else if (state.step === 'sendparcel') {
                 if (parseInt(text)) {
                     api.lookupPostcode(text).then(function (data) {
                         console.log(data);
-                        state.step ='to post code'
+                        state.step = 'from post code'
+                        state.from = text;
+                        sendText(sender, "Please provide your postcode of the recipient of your parcel")
+                    })
+                } else {
+                    sendText(sender, 'please provide the post code in the right format');
+                }
+            } else if (state.step === 'from post code') {
+                if (parseInt(text)) {
+                    api.lookupPostcode(text).then(function (data) {
+                        console.log(data);
+                        state.step = 'to post code'
                         state.from = text;
                         sendText(sender, "Ready to quote?")
                     })
@@ -84,13 +82,11 @@ app.post('/webhook/', function(req,res) {
 })
 
 
-
-
 const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
 function sendText(sender, text) {
 
-    let messageData = { text: text};
-     console.log(messageData);
+    let messageData = {text: text};
+    console.log(messageData);
     if (text.indexOf('template') > -1) {
         messageData = {
             attachment: {
@@ -100,10 +96,10 @@ function sendText(sender, text) {
                     elements: [
                         {
                             title: '24th Street',
-                            'subtitle': '43 mins, 9 cars. 58 mins, 9 cars. 73 mins, 9 cars.' ,
+                            'subtitle': '43 mins, 9 cars. 58 mins, 9 cars. 73 mins, 9 cars.',
                             'buttons': [{
                                 'type': 'web_url',
-                                'url': 'http://www.google.com/?q=' + text ,
+                                'url': 'http://www.google.com/?q=' + text,
                                 'title': 'Station Information'
                             }, {
                                 'type': 'postback',
@@ -130,7 +126,7 @@ function sendText(sender, text) {
     }
     axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
-        params: {access_token: token} ,
+        params: {access_token: token},
         method: "POST",
         data: {
             recipient: {id: sender},
@@ -144,23 +140,23 @@ function sendQuickReply(sender) {
 
 
     let messageData = {
-            text:"MyPost Business offers the following services in Messenger:",
-            quick_replies:[
-                {
-                    "content_type":"text",
-                    "title":"Send a Parcel",
-                    "payload":"parcel"
-                },
-                {
-                    "content_type":"text",
-                    "title":"FAQ",
-                    "payload":"faq"
-                }
-            ]
-        };
+        text: "MyPost Business offers the following services in Messenger:",
+        quick_replies: [
+            {
+                "content_type": "text",
+                "title": "Send a Parcel",
+                "payload": "parcel"
+            },
+            {
+                "content_type": "text",
+                "title": "FAQ",
+                "payload": "faq"
+            }
+        ]
+    };
     axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
-        params: {access_token: token} ,
+        params: {access_token: token},
         method: "POST",
         data: {
             recipient: {id: sender},
