@@ -217,8 +217,9 @@ function getPostOfficesList(postOffices, currentUserLocation) {
             address = `${postOffice.address1} ${address}`;
         }
         const hours = postOffice.hoursThisWeek.filter((hours) => hours.hours !== 'Closed').map((hours) => `${hours.days}: ${hours.hours}`).join(' - ');
+        const distance = postOffice.distance < 1 ? `${postOffice.distance * 1000}m` : `${postOffice.distance}km`;
         return {
-            title: `${postOffice.name} ${postOffice.distance}km`,
+            title: `${postOffice.name} `,
             subtitle: `${address} ${hours}`,
             default_action: {
                 type: 'web_url',
