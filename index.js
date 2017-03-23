@@ -32,54 +32,52 @@ app.post('/webhook/', function (req, res) {
         let event = messaging_events[i];
         let sender = event.sender.id;
         db[sender] = db[sender] || {};
-        let senderState = db[sender];
 
         if (event.message && event.message.quick_reply) {
             let { payload } = event.message.quick_reply;
 
             if (payload === 'parcel') {
-                senderState.action = 'sendparcel';
+                db[sender].action = 'sendparcel';
                 sendText(sender, 'please provide the post code where you send your parcel from');
             } else if (payload === 'faq') {
-                senderState.action = 'faq';
+                db[sender].action = 'faq';
                 sendText(sender, "please ask me any questions in relation to mypost business");
             } else if (payload === 'postOffice') {
-                senderState.action = 'postOffice';
+                db[sender].action = 'postOffice';
                 sendQuickReply(sender, getNearestPostOfficesQuickReplies());
             } else {
                 //payload is the id
-                api.getDeliveryOptions(senderState.from, senderState.to, payload).then(function(data) {
-                    var price1 = data.items[0].prices[0].calculated_price
-                    var price2 = data.items[1].prices[0].calculated_price
-                    console.log(prices1);
-                    console.log(prices2);
-                    getDeliveryOptionsList(price1,price2)
-
-                })
+                api.getDeliveryOptions(db[sender].from, db[sender].to, payload).then(function(response) {
+                    var price1 = response.data.items[0].prices[0].calculated_price;
+                    var price2 = response.data.items[1].prices[0].calculated_price;
+                    console.log(price1);
+                    console.log(price2);
+                    sendList(sender, getDeliveryOptionsList(sender, price1, price2));
+                });
             }
         } else if (event.message && event.message.text) {
             let text = event.message.text;
             if (text.toLowerCase() === 'hi') {
-                senderState.step = 'starting';
+                db[sender].step = 'starting';
                 sendQuickReply(sender, getActionQuickReplies());
-            } else if (senderState.action === 'sendparcel') {
+            } else if (db[sender].action === 'sendparcel') {
                 let postcode = parseInt(text);
 
-                if(senderState.step === 'starting') {
+                if(db[sender].step === 'starting') {
                     if (postcode) {
                         api.lookupPostcode(postcode).then(function (data) {
-                            senderState.step = 'from';
-                            senderState.from = data.postcode;
+                            db[sender].step = 'from';
+                            db[sender].from = data.postcode;
                             sendText(sender, 'Please provide your postcode of the recipient of your parcel')
                         });
                     } else {
                         sendText(sender, 'please provide the post code in the right format');
                     }
-                } else if (senderState.step === 'from') {
+                } else if (db[sender].step === 'from') {
                     if (postcode) {
                         api.lookupPostcode(postcode).then(function (data) {
-                            senderState.step = 'to';
-                            senderState.to = data.postcode;
+                            db[sender].step = 'to';
+                            db[sender].to = data.postcode;
                             sendQuickReply(sender, getPackagingQuickReplies());
                         });
                     } else {
@@ -110,18 +108,19 @@ function displayPackagingOptions() {
 
 app.get('/order', (req, res) => {
     const state = db[req.query.senderId];
-    res.redirect(`https://ptest.npe.auspost.com.au/mypost-business/simple-send/?to=${state.to}&from=${state.from}&packagingType=${state.packagingType}&develiveryOption=${query.deliveryOption}`);
+    console.log(db);
+    console.log(req.query);
+    res.redirect(`https://ptest.npe.auspost.com.au/mypost-business/simple-send/?to=${state.to}&from=${state.from}&packagingType=${state.packagingType}&develiveryOption=${req.query.deliveryOption}`);
 });
 
-function sendText(sender, message) {
-
+function sendText(sender, text) {
     axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
         params: {access_token: token},
         method: "POST",
         data: {
             recipient: {id: sender},
-            message
+            message: {text}
         }
     });
 }
@@ -190,11 +189,11 @@ function getNearestPostOfficesQuickReplies() {
     }
 }
 
-function getDeliveryOptionsList(price1, price2) {
+function getDeliveryOptionsList(sender, price1, price2) {
     //TODO: Set DOMREG and DOMEXP dynamiccally.
     return [
         {
-            'title': price1,
+            'title': `$${price1}`,
             'image_url': 'https://00d2a94c.ngrok.io/assets/parcel.png',
             'subtitle': 'Standard parcel post',
             'buttons': [
@@ -207,7 +206,7 @@ function getDeliveryOptionsList(price1, price2) {
             ]
         },
         {
-            'title': price2,
+            'title': `$${price2}`,
             'image_url': 'https://00d2a94c.ngrok.io/assets/express.png',
             'subtitle': 'Express post',
             'buttons': [
