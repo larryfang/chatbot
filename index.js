@@ -172,19 +172,19 @@ function getActionQuickReplies() {
 }
 
 function getPackagingQuickReplies() {
-
+    console.log()
     let messageData = {
         text: "Please select your packaging options:",
         quick_replies: [
             {
                 "content_type": "text",
-                "title": displayPackagingOptions[0].label,
-                "payload": displayPackagingOptions[0].id
+                "title": displayPackagingOptions()[0].label,
+                "payload": displayPackagingOptions()[0].id
             },
             {
                 "content_type": "text",
-                "title": displayPackagingOptions[1].label,
-                "payload": displayPackagingOptions[0].id
+                "title": displayPackagingOptions()[1].label,
+                "payload": displayPackagingOptions()[0].id
             }
         ]
     };
