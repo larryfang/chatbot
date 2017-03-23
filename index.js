@@ -174,26 +174,26 @@ function getDeliveryOptionsList(sender, price1, price2) {
     return [
         {
             'title': `$${price1}`,
-            'image_url': 'https://00d2a94c.ngrok.io/assets/parcel@2x.png',
+            'image_url': 'https://blooming-anchorage-59177.herokuapp.com/assets/parcel@2x.png',
             'subtitle': 'Standard parcel post',
             'buttons': [
                 {
                     'title': 'Use parcel post',
                     'type': 'web_url',
-                    'url': `https://00d2a94c.ngrok.io/order?senderId=${sender}&deliveryOption=DOMREG`,
+                    'url': `https://blooming-anchorage-59177.herokuapp.com/order?senderId=${sender}&deliveryOption=DOMREG`,
                     'webview_height_ratio': 'full',
                 }
             ]
         },
         {
             'title': `$${price2}`,
-            'image_url': 'https://00d2a94c.ngrok.io/assets/express@2x.png',
+            'image_url': 'https://blooming-anchorage-59177.herokuapp.com/assets/express@2x.png',
             'subtitle': 'Express post',
             'buttons': [
                 {
                     'title': 'Use express post',
                     'type': 'web_url',
-                    'url': `https://00d2a94c.ngrok.io/order?senderId=${sender}&deliveryOption=DOMEXP`,
+                    'url': `https://blooming-anchorage-59177.herokuapp.com/order?senderId=${sender}&deliveryOption=DOMEXP`,
                     'webview_height_ratio': 'full',
                 }
             ]
