@@ -46,13 +46,11 @@ app.post('/webhook/', function (req, res) {
                 db[sender].action = 'postOffice';
                 sendElement(sender, getNearestPostOfficesQuickReplies());
             } else {
-                sendSenderAction();
+                sendSenderAction(sender);
 
                 api.getDeliveryOptions(db[sender].from, db[sender].to, payload).then(function(response) {
                     var price1 = response.data.items[0].prices[0].calculated_price;
                     var price2 = response.data.items[1].prices[0].calculated_price;
-                    console.log(price1);
-                    console.log(price2);
                     sendList(sender, getDeliveryOptionsList(sender, price1, price2));
                 });
             }
@@ -92,7 +90,7 @@ app.post('/webhook/', function (req, res) {
             if(attachment.type === 'location') {
                 const { lat, long } = attachment.payload.coordinates;
 
-                sendSenderAction();
+                sendSenderAction(sender);
 
                 api.getNearPostOffices(lat, long)
                   .then((result) => {
