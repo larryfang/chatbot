@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const api = require('./api');
-const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
+const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD";
 
 const app = express();
 
@@ -13,10 +13,6 @@ let db = {};
 app.set('port', (process.env.PORT || 5000));
 app.use(bodyParser.json());
 app.use(express.static('public'));
-
-app.get('/', function (req, res) {
-    res.send("Hi I'm a chatbot");
-});
 
 app.get('/webhook/', function (req, res) {
     if (req.query['hub.verify_token'] === 'blondibytes') {
@@ -38,7 +34,7 @@ app.post('/webhook/', function (req, res) {
 
             if (payload === 'parcel') {
                 db[sender].action = 'sendparcel';
-                sendText(sender, 'please provide the post code where you send your parcel from');
+                sendText(sender, 'What is your sender postcode?');
             } else if (payload === 'faq') {
                 db[sender].action = 'faq';
                 sendText(sender, "please ask me any questions in relation to mypost business");
@@ -49,8 +45,8 @@ app.post('/webhook/', function (req, res) {
                 sendSenderAction(sender);
 
                 api.getDeliveryOptions(db[sender].from, db[sender].to, payload).then(function(response) {
-                    var price1 = response.data.items[0].prices[0].calculated_price;
-                    var price2 = response.data.items[1].prices[0].calculated_price;
+                    const price1 = response.data.items[0].prices[0].calculated_price;
+                    const price2 = response.data.items[1].prices[0].calculated_price;
                     sendList(sender, getDeliveryOptionsList(sender, price1, price2));
                 });
             }
@@ -67,10 +63,10 @@ app.post('/webhook/', function (req, res) {
                         api.lookupPostcode(postcode).then(function (data) {
                             db[sender].step = 'from';
                             db[sender].from = data.postcode;
-                            sendText(sender, 'Please provide your postcode of the recipient of your parcel')
+                            sendText(sender, 'What is the recipient postcode?')
                         });
                     } else {
-                        sendText(sender, 'please provide the post code in the right format');
+                        sendText(sender, 'Please provide the post code in the right format');
                     }
                 } else if (db[sender].step === 'from') {
                     if (postcode) {
@@ -80,7 +76,7 @@ app.post('/webhook/', function (req, res) {
                             sendElement(sender, getPackagingQuickReplies());
                         });
                     } else {
-                        sendText(sender, 'please provide the post code in the right format');
+                        sendText(sender, 'Please provide the post code in the right format');
                     }
                 }
             }
@@ -99,18 +95,12 @@ app.post('/webhook/', function (req, res) {
             }
         }
     }
-    res.sendStatus(200)
 
+    res.sendStatus(200);
 });
-
-function displayPackagingOptions() {
-    return api.getPackagingTypes();
-}
 
 app.get('/order', (req, res) => {
     const state = db[req.query.senderId];
-    console.log(db);
-    console.log(req.query);
     res.redirect(`https://ptest.npe.auspost.com.au/mypost-business/simple-send/?to=${state.to}&from=${state.from}&packagingType=${state.packagingType}&develiveryOption=${req.query.deliveryOption}`);
 });
 
@@ -128,7 +118,7 @@ function sendText(sender, text) {
 
 function getActionQuickReplies() {
     return {
-        text: "MyPost Business offers the following services in Messenger:",
+        text: "MyPost Business offers the following services:",
         quick_replies: [
             {
                 "content_type": "text",
@@ -150,18 +140,19 @@ function getActionQuickReplies() {
 }
 
 function getPackagingQuickReplies() {
+    const packagingOptions = api.getPackagingTypes();
     return {
         text: "Please select your packaging options:",
         quick_replies: [
             {
                 "content_type": "text",
-                "title": displayPackagingOptions()[0].label,
-                "payload": displayPackagingOptions()[0].id
+                "title": packagingOptions[0].label,
+                "payload": packagingOptions[0].id
             },
             {
                 "content_type": "text",
-                "title": displayPackagingOptions()[1].label,
-                "payload": displayPackagingOptions()[1].id
+                "title": packagingOptions[1].label,
+                "payload": packagingOptions[1].id
             }
         ]
     };
@@ -183,7 +174,7 @@ function getDeliveryOptionsList(sender, price1, price2) {
     return [
         {
             'title': `$${price1}`,
-            'image_url': 'https://00d2a94c.ngrok.io/assets/parcel.png',
+            'image_url': 'https://00d2a94c.ngrok.io/assets/parcel@2x.png',
             'subtitle': 'Standard parcel post',
             'buttons': [
                 {
@@ -196,7 +187,7 @@ function getDeliveryOptionsList(sender, price1, price2) {
         },
         {
             'title': `$${price2}`,
-            'image_url': 'https://00d2a94c.ngrok.io/assets/express.png',
+            'image_url': 'https://00d2a94c.ngrok.io/assets/express@2x.png',
             'subtitle': 'Express post',
             'buttons': [
                 {
@@ -291,7 +282,6 @@ function sendSenderAction(sender) {
         }
     });
 }
-
 
 app.listen(app.get('port'), function () {
     console.log("Running: port", app.get('port'));
