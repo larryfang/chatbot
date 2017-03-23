@@ -46,6 +46,16 @@ app.post('/webhook/', function (req, res) {
             } else if (payload === 'postOffice') {
                 senderState.action = 'postOffice';
                 sendQuickReply(sender, getNearestPostOfficesQuickReplies());
+            } else {
+                //payload is the id
+                api.getDeliveryOptions(senderState.from, senderState.to, payload).then(function(data) {
+                    var price1 = data.items[0].prices[0].calculated_price
+                    var price2 = data.items[1].prices[0].calculated_price
+                    console.log(prices1);
+                    console.log(prices2);
+                    getDeliveryOptionsList(price1,price2)
+
+                })
             }
         } else if (event.message && event.message.text) {
             let text = event.message.text;
@@ -218,11 +228,11 @@ function getNearestPostOfficesQuickReplies() {
     }
 }
 
-function getDeliveryOptionsList() {
+function getDeliveryOptionsList(price1, price2) {
     //TODO: Set DOMREG and DOMEXP dynamiccally.
     return [
         {
-            'title': 'Parcel Post',
+            'title': price1,
             'image_url': 'https://00d2a94c.ngrok.io/assets/parcel.png',
             'subtitle': 'Standard parcel post',
             'buttons': [
@@ -235,7 +245,7 @@ function getDeliveryOptionsList() {
             ]
         },
         {
-            'title': 'Express Post',
+            'title': price2,
             'image_url': 'https://00d2a94c.ngrok.io/assets/express.png',
             'subtitle': 'Express post',
             'buttons': [
