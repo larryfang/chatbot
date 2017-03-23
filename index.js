@@ -82,24 +82,22 @@ app.post('/webhook/', function (req, res) {
                 db[sender].step = 'faq';
                 api.getFAQs().then( (result) => {
                     let faqs = result.data.faq.results.filter(item => item.question.toLowerCase().includes(text));
-                    console.log(result.data.faq.results);
-                    console.log(faqs.length);
+                    let results = faqs.map((faq) => ({
+                        title: faq.question,
+                        subtitle:  faq.answer,
+                        buttons: [
+                            {
+                                type: "phone_number",
+                                title: "Call Representative",
+                                payload: "+61413868683"
+                            }
+                        ]
+                    }));
 
                     if(faqs.length > 1) {
-                        let results = faqs.map((faq) => ({
-                            title: faq.question,
-                            subtitle:  faq.answer,
-                            "buttons":[
-                                {
-                                    "type":"phone_number",
-                                    "title":"Call Representative",
-                                    "payload":"+61413868683"
-                                }
-                            ]
-
-                        }));
-
                         sendList(sender, results.splice(0,3));
+                    } else if (faqs.length === 1) {
+                        sendGeneric(sender, results);
                     } else {
                         sendText(sender, 'Sorry there is no results for this question, please try something else');
                     }
