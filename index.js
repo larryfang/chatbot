@@ -44,7 +44,7 @@ app.post('/webhook/', function (req, res) {
                 sendText(sender, "please ask me any questions in relation to mypost business");
             } else if (payload === 'postOffice') {
                 db[sender].action = 'postOffice';
-                sendQuickReply(sender, getNearestPostOfficesQuickReplies());
+                sendElement(sender, getNearestPostOfficesQuickReplies());
             } else {
                 //payload is the id
                 api.getDeliveryOptions(db[sender].from, db[sender].to, payload).then(function(response) {
@@ -59,7 +59,7 @@ app.post('/webhook/', function (req, res) {
             let text = event.message.text;
             if (text.toLowerCase() === 'hi') {
                 db[sender].step = 'starting';
-                sendQuickReply(sender, getActionQuickReplies());
+                sendElement(sender, getActionQuickReplies());
             } else if (db[sender].action === 'sendparcel') {
                 let postcode = parseInt(text);
 
@@ -78,7 +78,7 @@ app.post('/webhook/', function (req, res) {
                         api.lookupPostcode(postcode).then(function (data) {
                             db[sender].step = 'to';
                             db[sender].to = data.postcode;
-                            sendQuickReply(sender, getPackagingQuickReplies());
+                            sendElement(sender, getPackagingQuickReplies());
                         });
                     } else {
                         sendText(sender, 'please provide the post code in the right format');
@@ -93,7 +93,7 @@ app.post('/webhook/', function (req, res) {
 
                 api.getNearPostOffices(lat, long)
                   .then((result) => {
-                    sendList(sender, getPostOfficesList(result.data, `${lat},${long}`))
+                      sendGeneric(sender, getPostOfficesList(result.data, `${lat},${long}`))
                   });
             }
         }
@@ -123,18 +123,6 @@ function sendText(sender, text) {
             message: {text}
         }
     });
-}
-
-function sendQuickReply(sender, quickReplies) {
-    axios({
-        url: "https://graph.facebook.com/v2.6/me/messages",
-        params: {access_token: token},
-        method: "POST",
-        data: {
-            recipient: {id: sender},
-            message: quickReplies
-        }
-    })
 }
 
 function getActionQuickReplies() {
@@ -222,15 +210,27 @@ function getDeliveryOptionsList(sender, price1, price2) {
 }
 
 function getPostOfficesList(postOffices, currentUserLocation) {
-    return postOffices.map((postOffice) => ({
-        title: `${postOffice.name} ${postOffice.distance}km`,
-        subtitle: `${postOffice.address1} ${postOffice.address2} ${postOffice.address3}`,
-        default_action: {
-            type: 'web_url',
-            url: `https://www.google.com/maps/dir/${currentUserLocation}/${postOffice.latitude},${postOffice.longitude}`,
-            'webview_height_ratio': 'tall',
+
+    return postOffices.map((postOffice) => {
+        const address = `${postOffice.address1} ${postOffice.address2} ${postOffice.address3}`;
+        const hours = postOffice.hoursThisWeek.filter((hours) => hours.hours !== 'Closed').map((hours) => `${hours.days}: ${hours.hours}`).join(' - ');
+        return {
+            title: `${postOffice.name} ${postOffice.distance}km`,
+            subtitle: `${address} ${hours}`,
+            default_action: {
+                type: 'web_url',
+                url: `https://www.google.com/maps/dir/${currentUserLocation}/${postOffice.latitude},${postOffice.longitude}`,
+                'webview_height_ratio': 'tall',
+            },
+            "buttons":[
+              {
+                type: 'web_url',
+                url: `https://www.google.com/maps/dir/${currentUserLocation}/${postOffice.latitude},${postOffice.longitude}`,
+                title: 'Directions'
+              }
+            ]
         }
-    })).splice(0, 3);
+    }).splice(0, 3);
 }
 
 function sendList(sender, elements) {
@@ -245,6 +245,24 @@ function sendList(sender, elements) {
         }
     };
 
+    sendElement(sender, message);
+}
+
+function sendGeneric(sender, elements) {
+    const message = {
+        attachment: {
+            type: 'template',
+            payload: {
+                template_type: 'generic',
+                elements
+            }
+        }
+    };
+
+    sendElement(sender, message);
+}
+
+function sendElement(sender, message) {
     axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
         params: {access_token: token},
