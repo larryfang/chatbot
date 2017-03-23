@@ -27,9 +27,12 @@ app.post('/webhook/', function(req,res) {
     for (let i=0; i < messaging_events.length; i++) {
         let event = messaging_events[i]
         let sender = event.sender.id;
+        console.log(sender);
         if(event.message && event.message.text) {
             let text = event.message.text
-            sendText(sender, text)
+            if (text.indexOf('hi') > -1)   {
+                sendQuickReply(sender)
+            }
         } else if (event.message && event.message.attachments[0].type === 'image' ) {
             sendImage(sender, event.message.attachments[0].payload.url)
         }    else if (event.postback && event.postback.payload) {
@@ -62,24 +65,10 @@ function sendImage(sender, imageUrl) {
     })
 }
 
-// {
-//     "setting_type": "call_to_actions",
-//     "thread_state": "new_thread",
-//     "call_to_actions":[{
-//     "message":{
-//         "text":"Hello! This is a Messenger bot!"
-//     }
-// }]
-// }
+
 const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
 function sendText(sender, text) {
-    // let messageData = {attachment: {
-    //         type: "image",
-    //         payload: {
-    //             url: "https://auspost.com.au/mypost-business/assets/mypost-business-app/images/mypost-business-logo.svg"
-    //         }
-    //     }
-    // }
+
     let messageData = { text: text};
 
     if (text.indexOf('template') > -1) {
@@ -130,6 +119,36 @@ function sendText(sender, text) {
     })
     console.log()
 }
+
+function sendQuickReply(sender) {
+
+
+    let messageData = {
+            text:"MyPost Business offers the following services in Messenger:",
+            quick_replies:[
+                {
+                    "content_type":"text",
+                    "title":"Send A Parcel",
+                    "payload":"parcel"
+                },
+                {
+                    "content_type":"text",
+                    "title":"FAQ",
+                    "payload":"faq"
+                }
+            ]
+        };
+    request({
+        url: "https://graph.facebook.com/v2.6/me/messages",
+        qs: {access_token: token} ,
+        method: "POST",
+        json: {
+            recipient: {id: sender},
+            message: messageData
+        }
+    })
+}
+
 
 app.listen(app.get('port'), function () {
     console.log("Running: port")
