@@ -10,6 +10,7 @@ const app = express();
 var state = {step: "welcome"};
 app.set('port', (process.env.PORT || 5000));
 app.use(bodyParser.json());
+app.use(express.static('public'));
 
 app.get('/', function (req, res) {
     res.send("Hi I'm a chatbot");
@@ -29,28 +30,21 @@ app.post('/webhook/', function (req, res) {
         let event = messaging_events[i]
         let sender = event.sender.id;
 
-        // if (state.step === 'start') {
-        //     sendText(sender, 'Welcome to Auspost for small business')
-        // }
-        console.log(sender);
-
         if (event.message && event.message.quick_reply) {
             if (event.message.quick_reply.payload === 'parcel') {
-                state.step = 'sendparcel'
+                state.step = 'sendparcel';
                 sendText(sender, 'please provide the post code where you send your parcel from');
             } else if (event.message.quick_reply.payload === 'faq') {
-                state.step = 'faq'
+                state.step = 'faq';
                 sendText(sender, "please ask me any questions in relation to mypost business");
-
             }
-
         } else if (event.message && event.message.text) {
             console.log(typeof  event.message.text);
-            let text = event.message.text
+            let text = event.message.text;
             console.log(text);
             if (text.indexOf('hi') > -1) {
-                state.step = 'starting'
-                sendQuickReply(sender)
+                state.step = 'starting';
+                sendQuickReply(sender);
             } else if (state.step === 'sendparcel') {
                 if (parseInt(text)) {
                     api.lookupPostcode(text).then(function (data) {
@@ -79,7 +73,11 @@ app.post('/webhook/', function (req, res) {
     }
     res.sendStatus(200)
 
-})
+});
+
+app.get('/order', (req, res) => {
+    //TODO: encode base64 order + redirect to simplesend
+});
 
 
 const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
@@ -132,8 +130,7 @@ function sendText(sender, text) {
             recipient: {id: sender},
             message: messageData
         }
-    })
-    console.log()
+    });
 }
 
 function sendQuickReply(sender) {
@@ -163,6 +160,58 @@ function sendQuickReply(sender) {
             message: messageData
         }
     })
+}
+
+function sendList(sender) {
+
+    //TODO: Set DOMREG and DOMEXP dynamiccally.
+    const message = {
+        attachment: {
+            type: 'template',
+            payload: {
+                template_type: 'list',
+                'top_element_style': 'compact',
+                'elements': [
+                    {
+                        'title': 'Parcel Post',
+                        'image_url': 'https://00d2a94c.ngrok.io/assets/parcel.png',
+                        'subtitle': 'Standard parcel post',
+                        'buttons': [
+                            {
+                                'title': 'Use parcel post',
+                                'type': 'web_url',
+                                'url': `https://00d2a94c.ngrok.io/order?senderId=${sender}&deliveryOption=DOMREG`,
+                                'webview_height_ratio': 'full',
+                            }
+                        ]
+                    },
+                    {
+                        'title': 'Express Post',
+                        'image_url': 'https://00d2a94c.ngrok.io/assets/express.png',
+                        'subtitle': 'Express post',
+                        'buttons': [
+                            {
+                                'title': 'Use express post',
+                                'type': 'web_url',
+                                'url': `https://00d2a94c.ngrok.io/order?senderId=${sender}&deliveryOption=DOMEXP`,
+                                'webview_height_ratio': 'full',
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    };
+
+    axios({
+        url: "https://graph.facebook.com/v2.6/me/messages",
+        params: {access_token: token},
+        method: "POST",
+        data: {
+            recipient: {id: sender},
+            message
+        }
+    });
 }
 
 

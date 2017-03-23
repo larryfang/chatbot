@@ -9,17 +9,17 @@ function lookupPostcode(postcode) {
               if (localities === '') {
                   reject('Postcode not found');
               } else {
-                  const {locality} = localities;
+                  let {locality} = localities;
 
                   if (Array.isArray(locality)) {
-                      reject('More than one postcode found');
-                  } else {
-                      resolve({
-                          location: locality.location,
-                          postcode: locality.postcode,
-                          state: locality.state
-                      });
+                      locality = locality[0];
                   }
+
+                  resolve({
+                      location: locality.location,
+                      postcode: locality.postcode,
+                      state: locality.state
+                  });
               }
           });
     });
