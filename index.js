@@ -8,6 +8,8 @@ const api = require('./api');
 const app = express();
 
 var state = {step: "welcome"};
+let db = {};
+
 app.set('port', (process.env.PORT || 5000));
 app.use(bodyParser.json());
 app.use(express.static('public'));
@@ -29,43 +31,47 @@ app.post('/webhook/', function (req, res) {
     for (let i = 0; i < messaging_events.length; i++) {
         let event = messaging_events[i]
         let sender = event.sender.id;
+        db[sender] = db[sender] || {};
+        let senderState = db[sender];
 
         if (event.message && event.message.quick_reply) {
             if (event.message.quick_reply.payload === 'parcel') {
-                state.step = 'sendparcel';
+                senderState.action = 'sendparcel';
                 sendText(sender, 'please provide the post code where you send your parcel from');
             } else if (event.message.quick_reply.payload === 'faq') {
-                state.step = 'faq';
+                senderState.action = 'faq';
                 sendText(sender, "please ask me any questions in relation to mypost business");
             }
         } else if (event.message && event.message.text) {
             let text = event.message.text;
             if (text.toLowerCase() === 'hi') {
-                state.step = 'starting';
+                senderState.step = 'starting';
                 sendQuickReply(sender);
-            } else if (state.step === 'sendparcel') {
-                if (parseInt(text)) {
-                    api.lookupPostcode(text).then(function (data) {
-                        state.step = 'from post code';
-                        state.from = text;
-                        sendText(sender, "Please provide your postcode of the recipient of your parcel")
-                    })
-                } else {
-                    sendText(sender, 'please provide the post code in the right format');
-                }
-            } else if (state.step === 'from post code') {
-                if (parseInt(text)) {
-                    api.lookupPostcode(text).then(function (data) {
-                        console.log(data);
-                        state.step = 'to post code'
-                        state.from = text;
-                        sendText(sender, "Ready to quote?")
-                    })
-                } else {
-                    sendText(sender, 'please provide the post code in the right format');
+            } else if (senderState.action === 'sendparcel') {
+                let postcode = parseInt(text);
+
+                if(senderState.step === 'starting') {
+                    if (postcode) {
+                        api.lookupPostcode(postcode).then(function (data) {
+                            senderState.step = 'from';
+                            senderState.from = data.postcode;
+                            sendText(sender, 'Please provide your postcode of the recipient of your parcel')
+                        });
+                    } else {
+                        sendText(sender, 'please provide the post code in the right format');
+                    }
+                } else if (senderState.step === 'from') {
+                    if (postcode) {
+                        api.lookupPostcode(postcode).then(function (data) {
+                            senderState.step = 'to';
+                            senderState.to = data.postcode;
+                            sendText(sender, "packaging type...");
+                        });
+                    } else {
+                        sendText(sender, 'please provide the post code in the right format');
+                    }
                 }
             }
-
         }
     }
     res.sendStatus(200)
@@ -75,7 +81,6 @@ app.post('/webhook/', function (req, res) {
 app.get('/order', (req, res) => {
     //TODO: encode base64 order + redirect to simplesend
 });
-
 
 const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
 function sendText(sender, text) {
