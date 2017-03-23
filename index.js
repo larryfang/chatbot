@@ -83,9 +83,7 @@ app.post('/webhook/', function (req, res) {
                 db[sender].step = 'faq';
                 api.getFAQs().then( (result) => {
                     // console.log(result.data);
-                    let faqs = result.data.faq.results.filter( item => {
-                        item.question.includes(text)
-                    });
+                    let faqs = result.data.faq.results.filter(item => item.question.includes(text));
                     // console.log(faqs);
                     let results = faqs.map((faq) => ({
                         title: faq.question,
