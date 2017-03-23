@@ -81,7 +81,7 @@ app.post('/webhook/', function (req, res) {
             }  else if (db[sender].action === 'faq') {
                 db[sender].step = 'faq';
                 api.getFAQs().then( (result) => {
-                    let faqs = result.data.faq.results.filter(item => item.question.toLowerCase().includes(text));
+                    let faqs = result.data.faq.results.filter(item => item.question.toLowerCase().includes(text.toLowerCase()));
                     let results = faqs.map((faq) => ({
                         title: faq.question,
                         subtitle:  faq.answer,
