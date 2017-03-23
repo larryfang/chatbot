@@ -212,7 +212,10 @@ function getDeliveryOptionsList(sender, price1, price2) {
 function getPostOfficesList(postOffices, currentUserLocation) {
 
     return postOffices.map((postOffice) => {
-        const address = `${postOffice.address1} ${postOffice.address2} ${postOffice.address3}`;
+        let address = `${postOffice.address2} ${postOffice.address3}`;
+        if(postOffice.address1) {
+            address = `${postOffice.address1} ${address}`;
+        }
         const hours = postOffice.hoursThisWeek.filter((hours) => hours.hours !== 'Closed').map((hours) => `${hours.days}: ${hours.hours}`).join(' - ');
         return {
             title: `${postOffice.name} ${postOffice.distance}km`,
@@ -226,7 +229,8 @@ function getPostOfficesList(postOffices, currentUserLocation) {
               {
                 type: 'web_url',
                 url: `https://www.google.com/maps/dir/${currentUserLocation}/${postOffice.latitude},${postOffice.longitude}`,
-                title: 'Directions'
+                title: 'Directions',
+                'webview_height_ratio': 'tall',
               }
             ]
         }
