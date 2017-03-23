@@ -33,8 +33,7 @@ app.post('/webhook/', function (req, res) {
             let { payload } = event.message.quick_reply;
 
             if (payload === 'parcel') {
-                db[sender].action = 'sendparcel';
-                sendText(sender, 'What is your sender postcode?');
+                sendStartingQuickReplies();
             } else if (payload === 'faq') {
                 db[sender].action = 'faq';
                 sendText(sender, "please ask me any questions in relation to mypost business");
@@ -82,23 +81,26 @@ app.post('/webhook/', function (req, res) {
             }  else if (db[sender].action === 'faq') {
                 db[sender].step = 'faq';
                 api.getFAQs().then( (result) => {
-                    // console.log(result.data);
                     let faqs = result.data.faq.results.filter(item => item.question.includes(text));
-                    // console.log(faqs);
-                    let results = faqs.map((faq) => ({
-                        title: faq.question,
-                        subtitle:  faq.answer,
-                        "buttons":[
-                            {
-                                "type":"phone_number",
-                                "title":"Call Representative",
-                                "payload":"+61413868683"
-                            }
-                        ]
 
-                    }));
+                    if(faqs.length > 1) {
+                        let results = faqs.map((faq) => ({
+                            title: faq.question,
+                            subtitle:  faq.answer,
+                            "buttons":[
+                                {
+                                    "type":"phone_number",
+                                    "title":"Call Representative",
+                                    "payload":"+61413868683"
+                                }
+                            ]
 
-                    sendList(sender, results.splice(0,3)) ;
+                        }));
+
+                        sendList(sender, results.splice(0,3));
+                    } else {
+                        sendText(sender, 'Sorry there is no results for this question, please try something else');
+                    }
                 });
             }
         } else if(event.message && event.message.attachments) {
@@ -111,7 +113,7 @@ app.post('/webhook/', function (req, res) {
 
                 api.getNearPostOffices(lat, long)
                   .then((result) => {
-                      sendGeneric(sender, getPostOfficesList(result.data, `${lat},${long}`))
+                      sendGeneric(sender, getPostOfficesList(result.data, `${lat},${long}`));
                   });
             }
         }
@@ -124,6 +126,11 @@ app.get('/order', (req, res) => {
     const state = db[req.query.senderId];
     res.redirect(`https://ptest.npe.auspost.com.au/mypost-business/simple-send/?to=${state.to}&from=${state.from}&packagingType=${state.packagingType}&develiveryOption=${req.query.deliveryOption}`);
 });
+
+function sendStartingQuickReplies(sender) {
+    db[sender].step = 'starting';
+    sendElement(sender, getActionQuickReplies());
+}
 
 function sendText(sender, text) {
     axios({
