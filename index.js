@@ -48,7 +48,7 @@ app.post('/webhook/', function (req, res) {
                     const price1 = response.data.items[0].prices[0].calculated_price;
                     const price2 = response.data.items[1].prices[0].calculated_price;
                     sendList(sender, getDeliveryOptionsList(sender, price1, price2));
-                });
+                }).catch(error => console.log(error));
             }
         } else if (event.message && event.message.text) {
             let text = event.message.text;
@@ -83,10 +83,9 @@ app.post('/webhook/', function (req, res) {
                 db[sender].step = 'faq';
                 api.getFAQs().then( (result) => {
                     // console.log(result.data);
-                    let faqs = result.data.faq.results;
-                    faqs.filter( item => {
+                    let faqs = result.data.faq.results.filter( item => {
                         item.question.includes(text)
-                            })
+                    });
                     // console.log(faqs);
                     let results = faqs.map((faq) => ({
                         title: faq.question,
@@ -99,11 +98,10 @@ app.post('/webhook/', function (req, res) {
                             }
                         ]
 
-                    })) ;
+                    }));
 
-                     sendList(sender, results.splice(0,3) ) ;
-                }).catch( error => console.log(error))
-
+                    sendList(sender, results.splice(0,3)) ;
+                });
             }
         } else if(event.message && event.message.attachments) {
             const attachment = event.message.attachments[0];
