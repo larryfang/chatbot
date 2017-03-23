@@ -6,6 +6,8 @@ const axios = require('axios');
 const api = require('./api');
 
 const app = express();
+
+var state = { step: "welcome"};
 app.set('port', (process.env.PORT || 5000));
 app.use(bodyParser.json());
 
@@ -18,8 +20,9 @@ app.get('/webhook/', function(req,res) {
     
     if (req.query['hub.verify_token'] === 'blondibytes' ) {
         res.send(req.query['hub.challenge'])
+    }  else {
+        res.send("Wrong token");
     }
-    res.send("Wrong token");
 })
 
 app.post('/webhook/', function(req,res) {
@@ -27,22 +30,51 @@ app.post('/webhook/', function(req,res) {
     for (let i=0; i < messaging_events.length; i++) {
         let event = messaging_events[i]
         let sender = event.sender.id;
-        // console.log(sender);
+
+        // if (state.step === 'start') {
+        //     sendText(sender, 'Welcome to Auspost for small business')
+        // }
+         console.log(sender);
+
         if (event.message && event.message.quick_reply) {
             if (event.message.quick_reply.payload === 'parcel') {
+                state.step ='sendparcel'
                 sendText(sender, 'please provide the post code where you send your parcel from');
             } else if (event.message.quick_reply.payload === 'faq') {
+                state.step ='faq'
                 sendText(sender, "please ask me any questions in relation to mypost business");
 
             }
 
         }  else if(event.message && event.message.text) {
+            console.log(typeof  event.message.text);
             let text = event.message.text
             console.log(text);
             if (text.indexOf('hi') > -1)   {
+                state.step = 'starting'
                 sendQuickReply(sender)
-            } else if (Number.isInteger(text) && text.length >= 4 ) {
-                  console.log(text);
+            } else if (state.step === 'sendparcel' ) {
+                  if (parseInt(text)) {
+                      api.lookupPostcode(text).then(function (data) {
+                          console.log(data);
+                          state.step ='from post code'
+                          state.from = text;
+                          sendText(sender, "Please provide your postcode of the recipient of your parcel")
+                      })
+                  } else {
+                      sendText(sender, 'please provide the post code in the right format');
+                  }
+            }  else if (state.step === 'from post code') {
+                if (parseInt(text)) {
+                    api.lookupPostcode(text).then(function (data) {
+                        console.log(data);
+                        state.step ='to post code'
+                        state.from = text;
+                        sendText(sender, "Ready to quote?")
+                    })
+                } else {
+                    sendText(sender, 'please provide the post code in the right format');
+                }
             }
 
         }
@@ -98,9 +130,9 @@ function sendText(sender, text) {
     }
     axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
-        qs: {access_token: token} ,
+        params: {access_token: token} ,
         method: "POST",
-        json: {
+        data: {
             recipient: {id: sender},
             message: messageData
         }
@@ -128,9 +160,9 @@ function sendQuickReply(sender) {
         };
     axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
-        qs: {access_token: token} ,
+        params: {access_token: token} ,
         method: "POST",
-        json: {
+        data: {
             recipient: {id: sender},
             message: messageData
         }
