@@ -4,10 +4,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const api = require('./api');
+const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
 
 const app = express();
 
-var state = {step: "welcome"};
 let db = {};
 
 app.set('port', (process.env.PORT || 5000));
@@ -109,57 +109,19 @@ function displayPackagingOptions() {
 }
 
 app.get('/order', (req, res) => {
-    //TODO: encode base64 order + redirect to simplesend
+    const state = db[req.query.senderId];
+    res.redirect(`https://ptest.npe.auspost.com.au/mypost-business/simple-send/?to=${state.to}&from=${state.from}&packagingType=${state.packagingType}&develiveryOption=${query.deliveryOption}`);
 });
 
-const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
-function sendText(sender, text) {
+function sendText(sender, message) {
 
-    let messageData = {text: text};
-    if (text.indexOf('template') > -1) {
-        messageData = {
-            attachment: {
-                type: 'template',
-                payload: {
-                    template_type: 'generic',
-                    elements: [
-                        {
-                            title: '24th Street',
-                            'subtitle': '43 mins, 9 cars. 58 mins, 9 cars. 73 mins, 9 cars.',
-                            'buttons': [{
-                                'type': 'web_url',
-                                'url': 'http://www.google.com/?q=' + text,
-                                'title': 'Station Information'
-                            }, {
-                                'type': 'postback',
-                                'title': 'Departures',
-                                'payload': 'departures ' + text,
-                            }, {
-                                'type': 'web_url',
-                                'url': 'http://auspost.com.au/',
-                                'title': 'Directions'
-                            }]
-                        },
-                        {
-                            title: 'Daly City',
-                            'subtitle': '43 mins, 9 cars. 58 mins, 9 cars. 73 mins, 9 cars. 1 min, 9 cars. 4 mins, 9 cars.'
-                        },
-                        {
-                            title: 'Millbrae',
-                            'subtitle': '8 mins, 4 cars. 23 mins, 4 cars. 38 mins, 4 cars. 13 mins, 5 cars.'
-                        }
-                    ]
-                }
-            }
-        };
-    }
     axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
         params: {access_token: token},
         method: "POST",
         data: {
             recipient: {id: sender},
-            message: messageData
+            message
         }
     });
 }
@@ -187,7 +149,7 @@ function getActionQuickReplies() {
             },
             {
                 'content_type': 'text',
-                'title': 'Find the nearest Post office',
+                'title': 'Find the nearest P.O.',
                 'payload': 'postOffice'
             },
             {
