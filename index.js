@@ -223,7 +223,7 @@ function getDeliveryOptionsList(sender, price1, price2) {
 
 function getPostOfficesList(postOffices, currentUserLocation) {
     return postOffices.map((postOffice) => ({
-        title: postOffice.name,
+        title: `${postOffice.name} ${postOffice.distance}km`,
         subtitle: `${postOffice.address1} ${postOffice.address2} ${postOffice.address3}`,
         default_action: {
             type: 'web_url',
