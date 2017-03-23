@@ -41,7 +41,10 @@ app.post('/webhook/', function(req,res) {
             console.log(text);
             if (text.indexOf('hi') > -1)   {
                 sendQuickReply(sender)
+            } else if (Number.isInteger(text) && text.length >= 4 ) {
+                  console.log(text);
             }
+
         }
     }
     res.sendStatus(200)
