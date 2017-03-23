@@ -79,6 +79,31 @@ app.post('/webhook/', function (req, res) {
                         sendText(sender, 'Please provide the post code in the right format');
                     }
                 }
+            }  else if (db[sender].action === 'faq') {
+                db[sender].step = 'faq';
+                api.getFAQs().then( (result) => {
+                    // console.log(result.data);
+                    let faqs = result.data.faq.results;
+                    faqs.filter( item => {
+                        item.question.includes(text)
+                            })
+                    // console.log(faqs);
+                    let results = faqs.map((faq) => ({
+                        title: faq.question,
+                        subtitle:  faq.answer,
+                        "buttons":[
+                            {
+                                "type":"phone_number",
+                                "title":"Call Representative",
+                                "payload":"+61413868683"
+                            }
+                        ]
+
+                    })) ;
+
+                     sendList(sender, results.splice(0,3) ) ;
+                }).catch( error => console.log(error))
+
             }
         } else if(event.message && event.message.attachments) {
             const attachment = event.message.attachments[0];
@@ -268,7 +293,7 @@ function sendElement(sender, message) {
             recipient: {id: sender},
             message
         }
-    });
+    }).catch( error => console.log(error));
 }
 
 function sendSenderAction(sender) {
