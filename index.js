@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
+const api = require('./api');
 
 const app = express();
 app.set('port', (process.env.PORT || 5000));
@@ -136,6 +137,5 @@ function sendQuickReply(sender) {
 
 
 app.listen(app.get('port'), function () {
-    console.log("Running: port")
-}
-)
+    console.log("Running: port", app.get('port'));
+});
