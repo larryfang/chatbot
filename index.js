@@ -29,18 +29,23 @@ app.get('/webhook/', function (req, res) {
 app.post('/webhook/', function (req, res) {
     let messaging_events = req.body.entry[0].messaging;
     for (let i = 0; i < messaging_events.length; i++) {
-        let event = messaging_events[i]
+        let event = messaging_events[i];
         let sender = event.sender.id;
         db[sender] = db[sender] || {};
         let senderState = db[sender];
 
         if (event.message && event.message.quick_reply) {
-            if (event.message.quick_reply.payload === 'parcel') {
+            let { payload } = event.message.quick_reply;
+
+            if (payload === 'parcel') {
                 senderState.action = 'sendparcel';
                 sendText(sender, 'please provide the post code where you send your parcel from');
-            } else if (event.message.quick_reply.payload === 'faq') {
+            } else if (payload === 'faq') {
                 senderState.action = 'faq';
                 sendText(sender, "please ask me any questions in relation to mypost business");
+            } else if (payload === 'postOffice') {
+                senderState.action = 'postOffice';
+                sendQuickReply(sender, getNearestPostOfficesQuickReplies());
             }
         } else if (event.message && event.message.text) {
             let text = event.message.text;
@@ -71,6 +76,17 @@ app.post('/webhook/', function (req, res) {
                         sendText(sender, 'please provide the post code in the right format');
                     }
                 }
+            }
+        } else if(event.message && event.message.attachments) {
+            const attachment = event.message.attachments[0];
+
+            if(attachment.type === 'location') {
+                const { lat, long } = attachment.payload.coordinates;
+
+                api.getNearPostOffices(lat, long)
+                  .then((result) => {
+                    sendList(sender, getPostOfficesList(result, `${lat},${long}`))
+                  });
             }
         }
     }
@@ -140,7 +156,6 @@ function sendText(sender, text) {
 }
 
 function sendQuickReply(sender, quickReplies) {
-
     axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
         params: {access_token: token},
@@ -153,7 +168,7 @@ function sendQuickReply(sender, quickReplies) {
 }
 
 function getActionQuickReplies() {
-    let messageData = {
+    return {
         text: "MyPost Business offers the following services in Messenger:",
         quick_replies: [
             {
@@ -162,18 +177,21 @@ function getActionQuickReplies() {
                 "payload": "parcel"
             },
             {
+                'content_type': 'text',
+                'title': 'Find the nearest Post office',
+                'payload': 'postOffice'
+            },
+            {
                 "content_type": "text",
                 "title": "FAQ",
                 "payload": "faq"
             }
         ]
     };
-    return messageData;
 }
 
 function getPackagingQuickReplies() {
-    console.log()
-    let messageData = {
+    return {
         text: "Please select your packaging options:",
         quick_replies: [
             {
@@ -188,46 +206,71 @@ function getPackagingQuickReplies() {
             }
         ]
     };
-    return messageData;
 }
 
-function sendList(sender) {
+function getNearestPostOfficesQuickReplies() {
+    return {
+        text: "Please share your location:",
+        quick_replies: [
+            {
+                'content_type': 'location'
+            }
+        ]
+    }
+}
 
+function getDeliveryOptionsList() {
     //TODO: Set DOMREG and DOMEXP dynamiccally.
+    return [
+        {
+            'title': 'Parcel Post',
+            'image_url': 'https://00d2a94c.ngrok.io/assets/parcel.png',
+            'subtitle': 'Standard parcel post',
+            'buttons': [
+                {
+                    'title': 'Use parcel post',
+                    'type': 'web_url',
+                    'url': `https://00d2a94c.ngrok.io/order?senderId=${sender}&deliveryOption=DOMREG`,
+                    'webview_height_ratio': 'full',
+                }
+            ]
+        },
+        {
+            'title': 'Express Post',
+            'image_url': 'https://00d2a94c.ngrok.io/assets/express.png',
+            'subtitle': 'Express post',
+            'buttons': [
+                {
+                    'title': 'Use express post',
+                    'type': 'web_url',
+                    'url': `https://00d2a94c.ngrok.io/order?senderId=${sender}&deliveryOption=DOMEXP`,
+                    'webview_height_ratio': 'full',
+                }
+            ]
+        }
+    ];
+}
+
+function getPostOfficesList(postOffices, currentUserLocation) {
+    return postOffices.map((postOffice) => ({
+        title: postOffice.name,
+        subtitle: `${postOffice.address1} ${postOffice.address2} ${postOffice.address3}`,
+        default_action: {
+            type: 'web_url',
+            url: `https://www.google.com/maps/dir/${currentUserLocation}/${postOffice.latitude},${postOffice.longitude}`,
+            'webview_height_ratio': 'tall',
+        }
+    }));
+}
+
+function sendList(sender, elements) {
     const message = {
         attachment: {
             type: 'template',
             payload: {
                 template_type: 'list',
                 'top_element_style': 'compact',
-                'elements': [
-                    {
-                        'title': 'Parcel Post',
-                        'image_url': 'https://00d2a94c.ngrok.io/assets/parcel.png',
-                        'subtitle': 'Standard parcel post',
-                        'buttons': [
-                            {
-                                'title': 'Use parcel post',
-                                'type': 'web_url',
-                                'url': `https://00d2a94c.ngrok.io/order?senderId=${sender}&deliveryOption=DOMREG`,
-                                'webview_height_ratio': 'full',
-                            }
-                        ]
-                    },
-                    {
-                        'title': 'Express Post',
-                        'image_url': 'https://00d2a94c.ngrok.io/assets/express.png',
-                        'subtitle': 'Express post',
-                        'buttons': [
-                            {
-                                'title': 'Use express post',
-                                'type': 'web_url',
-                                'url': `https://00d2a94c.ngrok.io/order?senderId=${sender}&deliveryOption=DOMEXP`,
-                                'webview_height_ratio': 'full',
-                            }
-                        ]
-                    }
-                ]
+                elements
             }
         }
     };

@@ -1,5 +1,5 @@
 const axios = require('axios');
-const {POSTCODE_API, POSTCODE_AUTH_KEY, PRESENTATION_API, PRICES_API} = require('./api.constants');
+const {POSTCODE_API, POSTCODE_AUTH_KEY, PRESENTATION_API, PRICES_API, LOCATION_API} = require('./api.constants');
 
 function lookupPostcode(postcode) {
     return new Promise((resolve, reject) => {
@@ -65,8 +65,13 @@ function getDeliveryOptions(fromPostcode, toPostcode, selectedPackagingTypeId) {
       });
 }
 
+function getNearPostOffices(lat, long) {
+    return axios.get(`${LOCATION_API}${encodeURIComponent(`${lat},${long}`)}`);
+}
+
 module.exports = {
     lookupPostcode,
     getPackagingTypes,
-    getDeliveryOptions
+    getDeliveryOptions,
+    getNearPostOffices
 };
