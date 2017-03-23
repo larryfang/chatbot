@@ -46,7 +46,8 @@ app.post('/webhook/', function (req, res) {
                 db[sender].action = 'postOffice';
                 sendElement(sender, getNearestPostOfficesQuickReplies());
             } else {
-                //payload is the id
+                sendSenderAction();
+
                 api.getDeliveryOptions(db[sender].from, db[sender].to, payload).then(function(response) {
                     var price1 = response.data.items[0].prices[0].calculated_price;
                     var price2 = response.data.items[1].prices[0].calculated_price;
@@ -90,6 +91,8 @@ app.post('/webhook/', function (req, res) {
 
             if(attachment.type === 'location') {
                 const { lat, long } = attachment.payload.coordinates;
+
+                sendSenderAction();
 
                 api.getNearPostOffices(lat, long)
                   .then((result) => {
@@ -275,6 +278,18 @@ function sendElement(sender, message) {
         data: {
             recipient: {id: sender},
             message
+        }
+    });
+}
+
+function sendSenderAction(sender) {
+    axios({
+        url: "https://graph.facebook.com/v2.6/me/messages",
+        params: {access_token: token},
+        method: "POST",
+        data: {
+            recipient: {id: sender},
+            sender_action: 'typing_on'
         }
     });
 }
