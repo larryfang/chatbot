@@ -28,11 +28,11 @@ function lookupPostcode(postcode) {
 function getPackagingTypes() {
     return [
         {
-            label: '500g',
+            label: '500g satchel',
             id: 'PKSS'
         },
         {
-            label: '3kg',
+            label: '3kg satchel',
             id: 'PKSM'
         }
     ];

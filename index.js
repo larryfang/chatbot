@@ -46,7 +46,7 @@ app.post('/webhook/', function (req, res) {
             let text = event.message.text;
             if (text.toLowerCase() === 'hi') {
                 senderState.step = 'starting';
-                sendQuickReply(sender);
+                sendQuickReply(sender, getActionQuickReplies());
             } else if (senderState.action === 'sendparcel') {
                 let postcode = parseInt(text);
 
@@ -65,7 +65,7 @@ app.post('/webhook/', function (req, res) {
                         api.lookupPostcode(postcode).then(function (data) {
                             senderState.step = 'to';
                             senderState.to = data.postcode;
-                            sendText(sender, "packaging type...");
+                            sendQuickReply(sender, getPackagingQuickReplies());
                         });
                     } else {
                         sendText(sender, 'please provide the post code in the right format');
@@ -77,6 +77,10 @@ app.post('/webhook/', function (req, res) {
     res.sendStatus(200)
 
 });
+
+function displayPackagingOptions() {
+    return api.getPackagingTypes();
+}
 
 app.get('/order', (req, res) => {
     //TODO: encode base64 order + redirect to simplesend
@@ -135,9 +139,20 @@ function sendText(sender, text) {
     });
 }
 
-function sendQuickReply(sender) {
+function sendQuickReply(sender, quickReplies) {
 
+    axios({
+        url: "https://graph.facebook.com/v2.6/me/messages",
+        params: {access_token: token},
+        method: "POST",
+        data: {
+            recipient: {id: sender},
+            message: quickReplies
+        }
+    })
+}
 
+function getActionQuickReplies() {
     let messageData = {
         text: "MyPost Business offers the following services in Messenger:",
         quick_replies: [
@@ -153,15 +168,27 @@ function sendQuickReply(sender) {
             }
         ]
     };
-    axios({
-        url: "https://graph.facebook.com/v2.6/me/messages",
-        params: {access_token: token},
-        method: "POST",
-        data: {
-            recipient: {id: sender},
-            message: messageData
-        }
-    })
+    return messageData;
+}
+
+function getPackagingQuickReplies() {
+
+    let messageData = {
+        text: "Please select your packaging options:",
+        quick_replies: [
+            {
+                "content_type": "text",
+                "title": displayPackagingOptions[0].label,
+                "payload": displayPackagingOptions[0].id
+            },
+            {
+                "content_type": "text",
+                "title": displayPackagingOptions[1].label,
+                "payload": displayPackagingOptions[0].id
+            }
+        ]
+    };
+    return messageData;
 }
 
 function sendList(sender) {
