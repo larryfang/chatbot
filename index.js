@@ -85,7 +85,7 @@ app.post('/webhook/', function (req, res) {
 
                 api.getNearPostOffices(lat, long)
                   .then((result) => {
-                    sendList(sender, getPostOfficesList(result, `${lat},${long}`))
+                    sendList(sender, getPostOfficesList(result.data, `${lat},${long}`))
                   });
             }
         }
@@ -260,7 +260,7 @@ function getPostOfficesList(postOffices, currentUserLocation) {
             url: `https://www.google.com/maps/dir/${currentUserLocation}/${postOffice.latitude},${postOffice.longitude}`,
             'webview_height_ratio': 'tall',
         }
-    }));
+    })).splice(0, 3);
 }
 
 function sendList(sender, elements) {
@@ -283,7 +283,7 @@ function sendList(sender, elements) {
             recipient: {id: sender},
             message
         }
-    });
+    }).catch((error) => console.log(error));
 }
 
 
