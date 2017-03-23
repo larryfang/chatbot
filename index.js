@@ -106,7 +106,6 @@ const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNu
 function sendText(sender, text) {
 
     let messageData = {text: text};
-    console.log(messageData);
     if (text.indexOf('template') > -1) {
         messageData = {
             attachment: {
@@ -283,7 +282,7 @@ function sendList(sender, elements) {
             recipient: {id: sender},
             message
         }
-    }).catch((error) => console.log(error));
+    });
 }
 
 
