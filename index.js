@@ -27,17 +27,20 @@ app.post('/webhook/', function(req,res) {
     for (let i=0; i < messaging_events.length; i++) {
         let event = messaging_events[i]
         let sender = event.sender.id;
-        console.log(sender);
-        if(event.message && event.message.text) {
+        // console.log(sender);
+        if (event.message && event.message.quick_reply) {
+            if (event.message.quick_reply.payload === 'parcel') {
+                sendText(sender, 'please provide the post code where you send your parcel from');
+            } else if (event.message.quick_reply.payload === 'faq') {
+                sendText(sender, "please ask me any questions in relation to mypost business");
+
+            }
+
+        }  else if(event.message && event.message.text) {
             let text = event.message.text
+            console.log(text);
             if (text.indexOf('hi') > -1)   {
                 sendQuickReply(sender)
-            }
-        } else if (event.message && event.message.attachments[0].type === 'image' ) {
-            sendImage(sender, event.message.attachments[0].payload.url)
-        }    else if (event.postback && event.postback.payload) {
-            if (event.postback.payload.indexOf('departures') > -1) {
-                sendText(sender, event.postback.payload);
             }
         }
     }
@@ -45,32 +48,14 @@ app.post('/webhook/', function(req,res) {
 
 })
 
-function sendImage(sender, imageUrl) {
-    let messageData = {attachment: {
-            type: "image",
-            payload: {
-                url: "https://auspost.com.au/content/dam/auspost_corp/home/enrique/photo-selling-online.jpg.auspostimage.550*0.default.low.jpg"
-            }
-        }
-    }
 
-    request({
-        url: "https://graph.facebook.com/v2.6/me/messages",
-        qs: {access_token: token} ,
-        method: "POST",
-        json: {
-            recipient: {id: sender},
-            message: messageData
-        }
-    })
-}
 
 
 const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD"
 function sendText(sender, text) {
 
     let messageData = { text: text};
-
+     console.log(messageData);
     if (text.indexOf('template') > -1) {
         messageData = {
             attachment: {
@@ -128,7 +113,7 @@ function sendQuickReply(sender) {
             quick_replies:[
                 {
                     "content_type":"text",
-                    "title":"Send A Parcel",
+                    "title":"Send a Parcel",
                     "payload":"parcel"
                 },
                 {
