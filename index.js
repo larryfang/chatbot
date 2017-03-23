@@ -39,17 +39,14 @@ app.post('/webhook/', function (req, res) {
                 sendText(sender, "please ask me any questions in relation to mypost business");
             }
         } else if (event.message && event.message.text) {
-            console.log(typeof  event.message.text);
             let text = event.message.text;
-            console.log(text);
-            if (text.indexOf('hi') > -1) {
+            if (text.toLowerCase() === 'hi') {
                 state.step = 'starting';
                 sendQuickReply(sender);
             } else if (state.step === 'sendparcel') {
                 if (parseInt(text)) {
                     api.lookupPostcode(text).then(function (data) {
-                        console.log(data);
-                        state.step = 'from post code'
+                        state.step = 'from post code';
                         state.from = text;
                         sendText(sender, "Please provide your postcode of the recipient of your parcel")
                     })
