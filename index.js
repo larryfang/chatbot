@@ -64,7 +64,9 @@ app.post('/webhook/', function (req, res) {
                             db[sender].step = 'from';
                             db[sender].from = data.postcode;
                             sendText(sender, 'What is the recipient postcode?')
-                        });
+                        }).catch(() => {
+                              sendText(sender, 'I am sorry but this postcode is not available yet, please try another one');
+                          });
                     } else {
                         sendText(sender, 'Please provide the post code in the right format');
                     }
@@ -74,6 +76,8 @@ app.post('/webhook/', function (req, res) {
                             db[sender].step = 'to';
                             db[sender].to = data.postcode;
                             sendElement(sender, getPackagingQuickReplies());
+                        }).catch(() => {
+                            sendText(sender, 'I am sorry but this postcode is not available yet, please try another one');
                         });
                     } else {
                         sendText(sender, 'Please provide the post code in the right format');
