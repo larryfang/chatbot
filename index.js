@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const api = require('./api');
 const token = "EAADAcQndBogBADO4ohIPHjjrglohx1aWEVtaJtTEGFebKIljxJDUxE9kCSCrmkNusof3jjLaxkIIW1O6tEpHS2PWtceyg4GVVV0ZBOQQyIf8gwoYXrcYvUwKHSCzDxnMRMPagXm1uII7b0ccCwvMZA6yJMyPsttKR69vUZASQZDZD";
+const striptags = require('striptags');
 
 const app = express();
 
@@ -84,7 +85,7 @@ app.post('/webhook/', function (req, res) {
                     let faqs = result.data.faq.results.filter(item => item.question.toLowerCase().includes(text.toLowerCase()));
                     let results = faqs.map((faq) => ({
                         title: faq.question,
-                        subtitle:  faq.answer,
+                        subtitle:  striptags(faq.answer),
                         buttons: [
                             {
                                 type: "phone_number",
