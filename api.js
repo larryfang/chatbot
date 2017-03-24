@@ -34,6 +34,10 @@ function getPackagingTypes() {
         {
             label: '3kg satchel',
             id: 'PKSM'
+        },
+        {
+            label: '5kg satchel',
+            id: 'PKSL'
         }
     ];
 }

@@ -171,18 +171,11 @@ function getPackagingQuickReplies() {
     const packagingOptions = api.getPackagingTypes();
     return {
         text: "Please select your packaging options:",
-        quick_replies: [
-            {
-                "content_type": "text",
-                "title": packagingOptions[0].label,
-                "payload": packagingOptions[0].id
-            },
-            {
-                "content_type": "text",
-                "title": packagingOptions[1].label,
-                "payload": packagingOptions[1].id
-            }
-        ]
+        quick_replies: packagingOptions.map((packagingType) => ({
+            content_type: 'text',
+            title: packagingType.label,
+            payload: packagingType.id
+        }))
     };
 }
 
