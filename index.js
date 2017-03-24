@@ -256,7 +256,7 @@ function getPostOfficesList(postOffices, currentUserLocation) {
                 {
                     type: "phone_number",
                     title: "Call",
-                    payload: `+61${postOffice.phone_number}`
+                    payload: postOffice.phone_number.replace(' ', '')
                 }
             ]
         }
