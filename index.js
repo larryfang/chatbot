@@ -33,7 +33,7 @@ app.post('/webhook/', function (req, res) {
             let { payload } = event.message.quick_reply;
 
             if (payload === 'parcel') {
-                sendStartingQuickReplies();
+                sendStartingQuickReplies(sender);
             } else if (payload === 'faq') {
                 db[sender].action = 'faq';
                 sendText(sender, "please ask me any questions in relation to mypost business");
