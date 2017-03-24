@@ -247,12 +247,17 @@ function getPostOfficesList(postOffices, currentUserLocation) {
                 'webview_height_ratio': 'tall',
             },
             "buttons":[
-              {
-                type: 'web_url',
-                url: `https://www.google.com/maps/dir/${currentUserLocation}/${postOffice.latitude},${postOffice.longitude}`,
-                title: 'Directions',
-                'webview_height_ratio': 'tall',
-              }
+                {
+                    type: 'web_url',
+                    url: `https://www.google.com/maps/dir/${currentUserLocation}/${postOffice.latitude},${postOffice.longitude}`,
+                    title: 'Directions',
+                    'webview_height_ratio': 'tall',
+                },
+                {
+                    type: "phone_number",
+                    title: "Call",
+                    payload: postOffice.phone_number
+                }
             ]
         }
     }).splice(0, 3);
