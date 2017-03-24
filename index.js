@@ -33,7 +33,8 @@ app.post('/webhook/', function (req, res) {
             let { payload } = event.message.quick_reply;
 
             if (payload === 'parcel') {
-                sendStartingQuickReplies(sender);
+                db[sender].action = 'sendparcel';
+                sendText(sender, 'What is your sender postcode?');
             } else if (payload === 'faq') {
                 db[sender].action = 'faq';
                 sendText(sender, "please ask me any questions in relation to mypost business");
@@ -52,8 +53,7 @@ app.post('/webhook/', function (req, res) {
         } else if (event.message && event.message.text) {
             let text = event.message.text;
             if (text.toLowerCase() === 'hi') {
-                db[sender].step = 'starting';
-                sendElement(sender, getActionQuickReplies());
+                sendStartingQuickReplies(sender);
             } else if (db[sender].action === 'sendparcel') {
                 let postcode = parseInt(text);
 
