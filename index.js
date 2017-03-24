@@ -49,7 +49,9 @@ app.post('/webhook/', function (req, res) {
                     const price1 = response.data.items[0].prices[0].calculated_price;
                     const price2 = response.data.items[1].prices[0].calculated_price;
                     sendList(sender, getDeliveryOptionsList(sender, price1, price2));
-                }).catch(error => console.log(error));
+                }).catch(() => {
+                    sendText(sender, 'Sorry we can not fetch a price at the moment, please try again later.');
+                });
             }
         } else if (event.message && event.message.text) {
             let text = event.message.text;
