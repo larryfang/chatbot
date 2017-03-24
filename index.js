@@ -38,7 +38,7 @@ app.post('/webhook/', function (req, res) {
                 sendText(sender, 'What is your sender postcode?');
             } else if (payload === 'faq') {
                 db[sender].action = 'faq';
-                sendText(sender, "please ask me any questions in relation to mypost business");
+                sendText(sender, "Please provide a keyword in relation to mypost business");
             } else if (payload === 'postOffice') {
                 db[sender].action = 'postOffice';
                 sendElement(sender, getNearestPostOfficesQuickReplies());
