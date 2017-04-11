@@ -1,5 +1,5 @@
 const axios = require('axios');
-const {POSTCODE_API, POSTCODE_AUTH_KEY, PRESENTATION_API, PRICES_API, LOCATION_API, FAQ_API} = require('./api.constants');
+const {POSTCODE_API, POSTCODE_AUTH_KEY, PRESENTATION_API, PRICES_API, LOCATION_API, FAQ_API, TRACK_API, TRACK_AUTH_KEY} = require('./api.constants');
 
 function lookupPostcode(postcode) {
     return new Promise((resolve, reject) => {
@@ -78,10 +78,23 @@ function getFAQs() {
 
 }
 
+function getTrackStatus(articleId) {
+    return new Promise((resolve, reject) => {
+            axios.get(`${TRACK_API}${articleId}`, {headers: {'Authorization': TRACK_AUTH_KEY}})
+            .then((response) => {
+            let article = response.data.QueryTrackEventsResponse.TrackingResults[0].Consignment.Articles[0];
+            let location = article.Events[0].Location;
+            let status = article.Status;
+            resolve({articleId: articleId, location: location, status: status});
+        });
+    });
+}
+
 module.exports = {
     lookupPostcode,
     getPackagingTypes,
     getDeliveryOptions,
     getNearPostOffices,
-    getFAQs
+    getFAQs,
+    getTrackStatus
 };

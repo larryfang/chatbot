@@ -42,6 +42,9 @@ app.post('/webhook/', function (req, res) {
             } else if (payload === 'postOffice') {
                 db[sender].action = 'postOffice';
                 sendElement(sender, getNearestPostOfficesQuickReplies());
+            } else if (payload === 'track') {
+                db[sender].action = 'track';
+                sendText(sender, "What's the article ID you'd like to check?");
             } else {
                 sendSenderAction(sender);
 
@@ -109,6 +112,38 @@ app.post('/webhook/', function (req, res) {
                         sendText(sender, 'Sorry there is no results for this question, please try something else');
                     }
                 });
+            }  else if (db[sender].action === 'track') {
+                db[sender].step = 'track';
+                let articleId = event.message.text;
+                sendSenderAction(sender);
+                api.getTrackStatus(articleId).then((result) => {
+                    var response = result.status;
+                    if (result.location){
+                        response = `${response} at ${result.location}`;
+                    }
+
+                    let action = [
+                        {
+                            'title': `Article ${result.articleId}`,
+                            'subtitle': response,
+                            'buttons': [
+                                {
+                                    'title': 'More tracking info',
+                                    'type': 'web_url',
+                                    'url': `https://auspost.com.au/parcels-mail/track.html#/track?id=${result.articleId}`,
+                                    'webview_height_ratio': 'full',
+                                },
+                                {
+                                    'title': 'Save article',
+                                    'type': 'web_url',
+                                    'url': `https://auspost.com.au/parcels-mail/track.html#/track?id=${result.articleId}`,
+                                    'webview_height_ratio': 'full',
+                                }
+                            ]
+                        }
+                    ];
+                    sendGeneric(sender, action);
+                });
             }
         } else if(event.message && event.message.attachments) {
             const attachment = event.message.attachments[0];
@@ -155,6 +190,12 @@ function getActionQuickReplies() {
     return {
         text: "MyPost Business offers the following services:",
         quick_replies: [
+
+            {
+                "content_type": "text",
+                "title": "Track",
+                "payload": "track"
+            },
             {
                 "content_type": "text",
                 "title": "Send a Parcel",
