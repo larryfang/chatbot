@@ -6,5 +6,7 @@ module.exports = {
     PRESENTATION_API: `${SIMPLESEND_API}/accessone/v1/metadata/presentation?country=AU`,
     PRICES_API: `${SIMPLESEND_API}/shipping/v1/prices/items`,
     LOCATION_API: 'http://auspost.com.au/pol/findus/search.json?location=&type=RETAIL&services=&coords=',
-    FAQ_API:'https://auspost.com.au/help2/faq/search/'
+    FAQ_API:'https://auspost.com.au/help2/faq/search/',
+    TRACK_API: 'https://digitalapi.auspost.com.au/track/v3/search?q=',
+    TRACK_AUTH_KEY: 'Basic cHJvZF90cmFja2FwaTpXZWxjb21lQDEyMw=='
 };

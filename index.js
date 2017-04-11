@@ -109,6 +109,12 @@ app.post('/webhook/', function (req, res) {
                         sendText(sender, 'Sorry there is no results for this question, please try something else');
                     }
                 });
+            }  else if (db[sender].action === 'track') {
+                db[sender].step = 'track';
+                let articleId = event.message.text;
+                api.getTrackStatus(articleId).then((result) => {
+                    sendText(sender, result);
+                });
             }
         } else if(event.message && event.message.attachments) {
             const attachment = event.message.attachments[0];
@@ -169,6 +175,11 @@ function getActionQuickReplies() {
                 "content_type": "text",
                 "title": "FAQ",
                 "payload": "faq"
+            },
+            {
+                "content_type": "text",
+                "title": "Track",
+                "payload": "track"
             }
         ]
     };
