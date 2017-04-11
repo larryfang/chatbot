@@ -115,6 +115,7 @@ app.post('/webhook/', function (req, res) {
             }  else if (db[sender].action === 'track') {
                 db[sender].step = 'track';
                 let articleId = event.message.text;
+                sendSenderAction(sender);
                 api.getTrackStatus(articleId).then((result) => {
                     var response = result.status;
                     if (result.location){
@@ -127,7 +128,13 @@ app.post('/webhook/', function (req, res) {
                             'subtitle': response,
                             'buttons': [
                                 {
-                                    'title': 'Show more',
+                                    'title': 'More tracking info',
+                                    'type': 'web_url',
+                                    'url': `https://auspost.com.au/parcels-mail/track.html#/track?id=${result.articleId}`,
+                                    'webview_height_ratio': 'full',
+                                },
+                                {
+                                    'title': 'Save article',
                                     'type': 'web_url',
                                     'url': `https://auspost.com.au/parcels-mail/track.html#/track?id=${result.articleId}`,
                                     'webview_height_ratio': 'full',
