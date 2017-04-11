@@ -42,6 +42,9 @@ app.post('/webhook/', function (req, res) {
             } else if (payload === 'postOffice') {
                 db[sender].action = 'postOffice';
                 sendElement(sender, getNearestPostOfficesQuickReplies());
+            } else if (payload === 'track') {
+                db[sender].action = 'track';
+                sendText(sender, "What's the article ID you'd like to check?");
             } else {
                 sendSenderAction(sender);
 
@@ -113,7 +116,26 @@ app.post('/webhook/', function (req, res) {
                 db[sender].step = 'track';
                 let articleId = event.message.text;
                 api.getTrackStatus(articleId).then((result) => {
-                    sendText(sender, result);
+                    var response = result.status;
+                    if (result.location){
+                        response = `${response} at ${result.location}`;
+                    }
+
+                    let action = [
+                        {
+                            'title': `Article ${result.articleId}`,
+                            'subtitle': response,
+                            'buttons': [
+                                {
+                                    'title': 'Show more',
+                                    'type': 'web_url',
+                                    'url': `https://auspost.com.au/parcels-mail/track.html#/track?id=${result.articleId}`,
+                                    'webview_height_ratio': 'full',
+                                }
+                            ]
+                        }
+                    ];
+                    sendGeneric(sender, action);
                 });
             }
         } else if(event.message && event.message.attachments) {
@@ -161,6 +183,12 @@ function getActionQuickReplies() {
     return {
         text: "MyPost Business offers the following services:",
         quick_replies: [
+
+            {
+                "content_type": "text",
+                "title": "Track",
+                "payload": "track"
+            },
             {
                 "content_type": "text",
                 "title": "Send a Parcel",
@@ -175,11 +203,6 @@ function getActionQuickReplies() {
                 "content_type": "text",
                 "title": "FAQ",
                 "payload": "faq"
-            },
-            {
-                "content_type": "text",
-                "title": "Track",
-                "payload": "track"
             }
         ]
     };

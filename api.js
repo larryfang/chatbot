@@ -82,7 +82,10 @@ function getTrackStatus(articleId) {
     return new Promise((resolve, reject) => {
             axios.get(`${TRACK_API}${articleId}`, {headers: {'Authorization': TRACK_AUTH_KEY}})
             .then((response) => {
-               console.log(response.data.QueryTrackEventsResponse.TrackingResults[0].Consignment.Articles[0].Status);
+            let article = response.data.QueryTrackEventsResponse.TrackingResults[0].Consignment.Articles[0];
+            let location = article.Events[0].Location;
+            let status = article.Status;
+            resolve({articleId: articleId, location: location, status: status});
         });
     });
 }
