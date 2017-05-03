@@ -28,6 +28,7 @@ app.post('/webhook/', function (req, res) {
     for (let i = 0; i < messaging_events.length; i++) {
         let event = messaging_events[i];
         let sender = event.sender.id;
+        console.log("sender is...", sender);
         db[sender] = db[sender] || {};
 
         if (event.message && event.message.quick_reply) {
@@ -334,6 +335,7 @@ function sendGeneric(sender, elements) {
 }
 
 function sendElement(sender, message) {
+    console.log("sender is...", sender);
     axios({
         url: "https://graph.facebook.com/v2.6/me/messages",
         params: {access_token: token},
