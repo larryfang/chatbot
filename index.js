@@ -21,7 +21,7 @@ const messengerSettings = {
 };
 const messengerBot = new MessengerBot(messengerSettings);
 const botMaster = new Botmaster();
-botmaster.add(messengerBot);
+botMaster.addBot(messengerBot);
 
 let myIncomingMiddlewareController = (bot, update) => {
     if (update.message.text === 'hi' ||
@@ -39,7 +39,7 @@ let myIncomingMiddlewareController = (bot, update) => {
     }
 };
 
-botmaster.use({
+botMaster.use({
     type: 'incoming',
     name: 'My incoming middleware',
     controller: myIncomingMiddlewareController,

@@ -15,6 +15,7 @@
     "botmaster-messenger": "^1.0.1",
     "express": "^4.15.2",
     "lodash.isnumber": "^3.0.3",
+    "request": "^2.81.0",
     "striptags": "^3.0.1"
   },
   "devDependencies": {
