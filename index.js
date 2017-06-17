@@ -42,25 +42,16 @@ let myIncomingMiddlewareController = (bot, update) => {
         // sendStartingQuickReplies(sender);
         return bot.reply(update, 'well hi right back at you');
     } else {
-        const messages = ['I\'m sorry about this.',
-            'But it seems like I couldn\'t understand your message.',
-            'Could you try reformulating it?']
-        return bot.sendTextCascadeTo(messages, update.sender.id)
-        // return bot.reply(update, 'well hi right back at you');
+        return bot.reply(update, 'hello');
     }
 };
 
 botMaster.use({
     type: 'incoming',
     name: 'My incoming middleware',
-    controller: myIncomingMiddlewareController,
+    controller: myIncomingMiddlewareController
 });
-botMaster.on('error', (bot, err) => {
-    console.log(err.stack);
-})
-botMaster.on('update', (bot, update) => {
-    console.log(update);
-})
+
 
 server.on('listening', () => {
     console.log('My express app is listening and its server is used in Botmaster');
