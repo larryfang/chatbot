@@ -17,7 +17,7 @@ const messengerSettings = {
         pageToken: 'EAADAcQndBogBAE8mMzzFkVb7OF3XyYRwYbKDaTCYaBZBjOEEeiTo12EWScWeQaRMR1gOfxvEHbfgi5FpubtdxukKIm9EZBY5a3jH2K0UyGjthNxGWweuqqyrrFLRkoAL5yLMjZCJhJroskNnaFBvXCrDpUe4edOw7C9wxbSuAZDZD',
         fbAppSecret: '3311520fc1f63d1bd766936a170b96da',
     },
-    webhookEndpoint: 'webhook1234', // botmaster will mount this webhook on https://Your_Domain_Name/messenger/webhook1234
+    webhookEndpoint: 'webhook', // botmaster will mount this webhook on https://Your_Domain_Name/messenger/webhook1234
 };
 const messengerBot = new MessengerBot(messengerSettings);
 const botMaster = new Botmaster();
