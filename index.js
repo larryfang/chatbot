@@ -44,6 +44,12 @@ botMaster.use({
     name: 'My incoming middleware',
     controller: myIncomingMiddlewareController,
 });
+botMaster.on('error', (bot, err) => {
+    console.log(err.stack);
+})
+botMaster.on('update', (bot, update) => {
+    console.log(update);
+})
 
 const app = express();
 
