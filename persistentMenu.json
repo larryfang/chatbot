@@ -1,0 +1,21 @@
+{
+  "setting_type" : "call_to_actions",
+  "thread_state" : "existing_thread",
+  "call_to_actions": [
+    {
+      "type": "text",
+      "title": "Send a Parcel",
+      "payload": "parcel"
+    },
+    {
+      "type": "text",
+      "title": "Find the nearest P.O.",
+      "payload": "postOffice"
+    },
+    {
+      "type": "text",
+      "title": "FAQ",
+      "payload": "faq"
+    }
+  ]
+}
