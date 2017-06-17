@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.15.3",
     "body-parser": "^1.17.1",
+    "botmaster-messenger": "^1.0.1",
     "express": "^4.15.2",
     "lodash.isnumber": "^3.0.3",
     "striptags": "^3.0.1"
