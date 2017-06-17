@@ -1,7 +1,7 @@
 'use strict';
 
-// const express = require('express');
-// const bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 const axios = require('axios');
 const api = require('./api');
 const token = "EAADAcQndBogBAE8mMzzFkVb7OF3XyYRwYbKDaTCYaBZBjOEEeiTo12EWScWeQaRMR1gOfxvEHbfgi5FpubtdxukKIm9EZBY5a3jH2K0UyGjthNxGWweuqqyrrFLRkoAL5yLMjZCJhJroskNnaFBvXCrDpUe4edOw7C9wxbSuAZDZD";
@@ -19,8 +19,19 @@ const messengerSettings = {
     },
     webhookEndpoint: 'webhook' // botmaster will mount this webhook on https://Your_Domain_Name/messenger/webhook1234
 };
+
+const app = express();
+let db = {};
+app.set('port', (process.env.PORT || 5000));
+app.use(bodyParser.json());
+app.use(express.static('public'));
+const server = app.listen(app.get('port'), function () {
+    console.log("Running: port", app.get('port'));
+});
+
+
 const messengerBot = new MessengerBot(messengerSettings);
-const botMaster = new Botmaster();
+const botMaster = new Botmaster({server: server});
 botMaster.addBot(messengerBot);
 
 let myIncomingMiddlewareController = (bot, update) => {
@@ -51,13 +62,9 @@ botMaster.on('update', (bot, update) => {
     console.log(update);
 })
 
-// const app = express();
-
-// let db = {};
-//
-// app.set('port', (process.env.PORT || 5000));
-// app.use(bodyParser.json());
-// app.use(express.static('public'));
+server.on('listening', () => {
+    console.log('My express app is listening and its server is used in Botmaster');
+})
 //
 // app.get('/webhook/', function (req, res) {
 //     if (req.query['hub.verify_token'] === 'blondibytes') {
@@ -402,7 +409,5 @@ function sendSenderAction(sender) {
         }
     });
 }
-//
-// app.listen(app.get('port'), function () {
-//     console.log("Running: port", app.get('port'));
-// });
+
+
