@@ -28,14 +28,14 @@ let myIncomingMiddlewareController = (bot, update) => {
         update.message.text === 'Hi' ||
         update.message.text === 'hello' ||
         update.message.text === 'Hello') {
-        sendStartingQuickReplies(sender);
-        // return bot.reply(update, 'well hi right back at you');
+        // sendStartingQuickReplies(sender);
+        return bot.reply(update, 'well hi right back at you');
     } else {
         const messages = ['I\'m sorry about this.',
             'But it seems like I couldn\'t understand your message.',
             'Could you try reformulating it?']
-        // return bot.sendTextCascadeTo(messages, update.sender.id)
-        return bot.reply(update, 'well hi right back at you');
+        return bot.sendTextCascadeTo(messages, update.sender.id)
+        // return bot.reply(update, 'well hi right back at you');
     }
 };
 
