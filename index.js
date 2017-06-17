@@ -1,7 +1,7 @@
 'use strict';
 
-const express = require('express');
-const bodyParser = require('body-parser');
+// const express = require('express');
+// const bodyParser = require('body-parser');
 const axios = require('axios');
 const api = require('./api');
 const token = "EAADAcQndBogBAE8mMzzFkVb7OF3XyYRwYbKDaTCYaBZBjOEEeiTo12EWScWeQaRMR1gOfxvEHbfgi5FpubtdxukKIm9EZBY5a3jH2K0UyGjthNxGWweuqqyrrFLRkoAL5yLMjZCJhJroskNnaFBvXCrDpUe4edOw7C9wxbSuAZDZD";
@@ -14,10 +14,10 @@ const MessengerBot = require('botmaster-messenger');
 const messengerSettings = {
     credentials: {
         verifyToken: 'blondibytes',
-        pageToken: 'EAADAcQndBogBAE8mMzzFkVb7OF3XyYRwYbKDaTCYaBZBjOEEeiTo12EWScWeQaRMR1gOfxvEHbfgi5FpubtdxukKIm9EZBY5a3jH2K0UyGjthNxGWweuqqyrrFLRkoAL5yLMjZCJhJroskNnaFBvXCrDpUe4edOw7C9wxbSuAZDZD',
-        fbAppSecret: '3311520fc1f63d1bd766936a170b96da',
+        pageToken: 'EAADAcQndBogBABODbgsXOfefJZACQ07TZCUIps4i7F4vZCYOZBqLyLS5izb6sxiR7YtNZC1RmFixX89O428fPtKJd2pSd0n3fDzC8ZB8nuujWqeaOUUY8LsyYZByiOexZB6vGcOFHn23hUlRM6BIPmMmWU2cwOKE4FEjihAZArCgZAOQZDZD',
+        fbAppSecret: '3311520fc1f63d1bd766936a170b96da'
     },
-    webhookEndpoint: 'webhook', // botmaster will mount this webhook on https://Your_Domain_Name/messenger/webhook1234
+    webhookEndpoint: 'webhook' // botmaster will mount this webhook on https://Your_Domain_Name/messenger/webhook1234
 };
 const messengerBot = new MessengerBot(messengerSettings);
 const botMaster = new Botmaster();
@@ -51,13 +51,13 @@ botMaster.on('update', (bot, update) => {
     console.log(update);
 })
 
-const app = express();
+// const app = express();
 
-let db = {};
-
-app.set('port', (process.env.PORT || 5000));
-app.use(bodyParser.json());
-app.use(express.static('public'));
+// let db = {};
+//
+// app.set('port', (process.env.PORT || 5000));
+// app.use(bodyParser.json());
+// app.use(express.static('public'));
 //
 // app.get('/webhook/', function (req, res) {
 //     if (req.query['hub.verify_token'] === 'blondibytes') {
@@ -402,7 +402,7 @@ function sendSenderAction(sender) {
         }
     });
 }
-
-app.listen(app.get('port'), function () {
-    console.log("Running: port", app.get('port'));
-});
+//
+// app.listen(app.get('port'), function () {
+//     console.log("Running: port", app.get('port'));
+// });
